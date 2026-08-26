@@ -8,6 +8,8 @@ https://josue-dev-0210.github.io/Calculadora-Subredes-JC/
 FEATURES 
 
 - Subnet calculation
+- Topology of Network
+- IPv6 Support
 - CIDR support
 - Host range calculation
 - Network and broadcast address
