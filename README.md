@@ -2,7 +2,6 @@ SUB-NET CALCULATOR JC
 
 Interactive subnet calculator built with Vanilla JavaScript. Calculates subnet ranges, hosts, CIDR, subnet masks, IP class/type, and visual bit distribution with color-coded network and host bits
 
-VIEW
 
 https://josue-dev-0210.github.io/Calculadora-Subredes-JC/
 
@@ -34,11 +33,8 @@ PREVIEW
 
 FUTURE IMPROVEMENTS
 
-- IPv6 support
-- Export results
 - Dark/light theme
 - Advanced subnet visualization
-- Network topology examples
 
 AUTHOR
 
