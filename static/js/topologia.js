@@ -52,8 +52,8 @@ return `
 }
 
 function svgLinea(x1, y1, x2, y2, punteada = false) {
-    const dash = punteada ? ' stroke-dasharray="4 3"' : '';
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COLORES_TOPO.gray}" stroke-width="1.5"${dash}/>`;
+const dash = punteada ? ' stroke-dasharray="4 3"' : '';
+return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COLORES_TOPO.gray}" stroke-width="1.5"${dash}/>`;
 }
 
 function svgCaption(texto, x = 200, y = 20) {
@@ -77,73 +77,73 @@ return `
 }
 
 function topologiaLanPequena(gatewayIp, ultimoHostIp, cantHosts, redLabel) {
-    const w = 400, h = 250;
-    const maxMostrar = Math.min(cantHosts, 6);
-    const inicioX = 75;
+const w = 400, h = 280;
+const maxMostrar = Math.min(cantHosts, 6);
+const inicioX = 75;
     const anchoUtil = w - 2 * inicioX;
-    const espacio = maxMostrar > 1 ? anchoUtil / (maxMostrar - 1) : 0;
+const espacio = maxMostrar > 1 ? anchoUtil / (maxMostrar - 1) : 0;
 
-    let hosts = '';
-    let lineas = '';
-    for (let i = 0; i < maxMostrar; i++) {
-        const x = maxMostrar === 1 ? w / 2 : inicioX + i * espacio;
-        const esGateway = i === 0;
-        const etiqueta = esGateway ? 'Gateway' : `Host ${i + 1}`;
-        lineas += svgLinea(200, 110, x, 165, !esGateway);
-        hosts += svgHost(x, 190, etiqueta, esGateway ? COLORES_TOPO.green : COLORES_TOPO.white);
-    }
-    const extra = cantHosts > maxMostrar
-        ? `<text font-family="Courier New, monospace" font-size="9" x="200" y="238" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">+${cantHosts - maxMostrar} hosts adicionales hasta ${ultimoHostIp}</text>`
-        : `<text font-family="Courier New, monospace" font-size="9" x="200" y="238" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">gateway: ${gatewayIp}</text>`;
+let hosts = '';
+let lineas = '';
+for (let i = 0; i < maxMostrar; i++) {
+    const x = maxMostrar === 1 ? w / 2 : inicioX + i * espacio;
+    const esGateway = i === 0;
+    const etiqueta = esGateway ? 'Gateway' : `Host ${i + 1}`;
+    lineas += svgLinea(200, 132, x, 187, !esGateway);
+    hosts += svgHost(x, 212, etiqueta, esGateway ? COLORES_TOPO.green : COLORES_TOPO.white);
+}
+const extra = cantHosts > maxMostrar
+    ? `<text font-family="Courier New, monospace" font-size="9" x="200" y="260" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">+${cantHosts - maxMostrar} hosts adicionales hasta ${ultimoHostIp}</text>`
+    : `<text font-family="Courier New, monospace" font-size="9" x="200" y="260" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">gateway: ${gatewayIp}</text>`;
 
-    return `
-        <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
-            ${svgCaption('Red de área local (LAN pequeña) · ' + redLabel)}
-            ${svgLinea(200, 48, 200, 87)}
-            ${svgRouter(200, 33, 'Router')}
-            ${svgSwitch(200, 110, '')}
-            ${lineas}
-            ${hosts}
-            ${extra}
-        </svg>`;
+return `
+    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+        ${svgCaption('Red de área local (LAN pequeña) · ' + redLabel)}
+        ${svgLinea(200, 70, 200, 109)}
+        ${svgRouter(200, 55, 'Router')}
+        ${svgSwitch(200, 132, '')}
+        ${lineas}
+        ${hosts}
+        ${extra}
+    </svg>`;
 }
 
 function topologiaLanGrande(gatewayIp, primerHostIp, ultimoHostIp, etiquetaCantidad, redLabel) {
-    const w = 400, h = 250;
-    return `
-        <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
-            ${svgCaption('Red de área local · ' + redLabel)}
-            ${svgLinea(200, 48, 200, 87)}
-            ${svgRouter(200, 33, 'Gateway')}
-            ${svgSwitch(200, 110, '')}
-            ${svgLinea(200, 123, 200, 158)}
-        <g transform="translate(120,160)">
+const w = 400, h = 280;
+return `
+    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+        ${svgCaption('Red de área local · ' + redLabel)}
+        ${svgLinea(200, 70, 200, 109)}
+        ${svgRouter(200, 55, 'Gateway')}
+        ${svgSwitch(200, 132, '')}
+        ${svgLinea(200, 145, 200, 180)}
+        <g transform="translate(120,182)">
             <rect x="0" y="0" width="160" height="66" rx="6" fill="${COLORES_TOPO.surface}" stroke="${COLORES_TOPO.yellow}" stroke-width="1.5" stroke-dasharray="5 3"/>
             <text font-family="Courier New, monospace" font-size="11" x="80" y="26" text-anchor="middle" class="topo-label" fill="${COLORES_TOPO.yellow}">${etiquetaCantidad}</text>
             <text font-family="Courier New, monospace" font-size="8" x="80" y="44" text-anchor="middle" class="topo-sub-label" fill="${COLORES_TOPO.gray}">${primerHostIp} — ${ultimoHostIp}</text>
         </g>
-            <text font-family="Courier New, monospace" font-size="9" x="200" y="245" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">gateway: ${gatewayIp}</text>
-        </svg>`;
+        <text font-family="Courier New, monospace" font-size="9" x="200" y="267" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">gateway: ${gatewayIp}</text>
+    </svg>`;
 }
 
 function generarTopologiaSVG({ tipo, cidr, gateway, primerHost, ultimoHost, cantHosts, redLabel, esIpv6 = false }) {
 const esCero = typeof cantHosts === 'bigint' ? cantHosts <= 0n : cantHosts <= 0;
 if (esCero) {
     return `<svg viewBox="0 0 400 110" width="400" height="110" xmlns="http://www.w3.org/2000/svg">
-        ${svgCaption('Bloque /' + cidr)}
-        <text font-family="Courier New, monospace" font-size="9" x="200" y="60" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">Sin hosts utilizables (identificador o dirección única)</text>
-    </svg>`;
-}
+            ${svgCaption('Bloque /' + cidr)}
+            <text font-family="Courier New, monospace" font-size="9" x="200" y="60" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">Sin hosts utilizables (identificador o dirección única)</text>
+        </svg>`;
+    }
 const esDos = typeof cantHosts === 'bigint' ? cantHosts === 2n : cantHosts === 2;
-    if (esDos) {
+if (esDos) {
     return topologiaPuntoAPunto(primerHost, ultimoHost, redLabel);
-}
+    }
 const esGrande = typeof cantHosts === 'bigint' ? cantHosts > 6n : cantHosts > 6;
 if (esGrande) {
     const etiqueta = typeof cantHosts === 'bigint'
         ? formatearCantidadV6(cantHosts) + ' direcciones'
         : formatearCantidad(cantHosts) + ' hosts';
-    return topologiaLanGrande(gateway, primerHost, ultimoHost, etiqueta, redLabel);
+        return topologiaLanGrande(gateway, primerHost, ultimoHost, etiqueta, redLabel);
     }
     return topologiaLanPequena(gateway, ultimoHost, Number(cantHosts), redLabel);
 }
