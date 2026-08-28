@@ -159,7 +159,7 @@ function renderizarSaltoRed(r) {
 function renderizarTopologiaV4(r) {
   const cont = document.getElementById('diagrama-topologia-v4');
   if (!cont) return;
-  cont.innerHTML = generarTopologiaSVG({
+  const svg = generarTopologiaSVG({         
     cidr: r.cidr,
     gateway: r.primerHost,
     primerHost: r.primerHost,
@@ -167,9 +167,12 @@ function renderizarTopologiaV4(r) {
     cantHosts: r.cantHosts,
     redLabel: r.red + '/' + r.cidr,
   });
+  cont.innerHTML = svg;
+  ultimoSvgTopologiaV4 = svg;                
 }
 let ultimoResultadoV4 = null;
 let ultimasSubredesV4 = null;
+let ultimoSvgTopologiaV4 = null;            
 
 const ipEntrada   = document.getElementById('ip-entrada');
 const cidrEntrada = document.getElementById('cidr-entrada');
@@ -213,7 +216,7 @@ function ejecutar() {
 
   const cant = document.getElementById('num-subredes').value;
 
-  if (cant) dividirSubredes(); else limpiarTablaSubredes();  // ►►► NUEVO el "else limpiarTablaSubredes();"
+  if (cant) dividirSubredes(); else limpiarTablaSubredes();
 }
 
 function limpiarTablaSubredes() {
@@ -328,7 +331,7 @@ function renderizarTablaSubredes(subredes, solicitadas, cidr) {
     btn.addEventListener('click', () => {
       const s = subredes[parseInt(btn.dataset.indice)];
       const cont = document.getElementById('diagrama-topologia-v4');
-      cont.innerHTML = generarTopologiaSVG({
+      const svg = generarTopologiaSVG({     
         cidr: s.cidr,
         gateway: s.primerHost,
         primerHost: s.primerHost,
@@ -336,6 +339,8 @@ function renderizarTablaSubredes(subredes, solicitadas, cidr) {
         cantHosts: s.hostsUtil,
         redLabel: s.red + '/' + s.cidr,
       });
+      cont.innerHTML = svg;
+      ultimoSvgTopologiaV4 = svg;            
       document.getElementById('seccion-topologia').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
@@ -347,9 +352,10 @@ document.getElementById('num-subredes').addEventListener('keydown', e => {
 });
 
 
-document.getElementById('btn-exportar-pdf-v4').addEventListener('click', () => {
+document.getElementById('btn-exportar-pdf-v4').addEventListener('click', async (e) => { 
   if (!ultimoResultadoV4) { mostrarError('Primero calcula una subred para poder exportarla.'); return; }
   const r = ultimoResultadoV4;
+  const btn = e.currentTarget;             
 
   const campos = [
     ['Dirección de red', r.red + '/' + r.cidr],
@@ -361,7 +367,11 @@ document.getElementById('btn-exportar-pdf-v4').addEventListener('click', () => {
     ['Clase / Tipo', `Clase ${r.clase} · ${r.tipo}`],
   ];
 
-  const datos = { campos, nombreArchivo: `subred-${r.red.replace(/\./g, '-')}-${r.cidr}.pdf` };
+  const datos = {
+    campos,
+    nombreArchivo: `subred-${r.red.replace(/\./g, '-')}-${r.cidr}.pdf`,
+    topologiaSVG: ultimoSvgTopologiaV4,      
+  };
 
   if (ultimasSubredesV4) {
     datos.tabla = {
@@ -373,7 +383,15 @@ document.getElementById('btn-exportar-pdf-v4').addEventListener('click', () => {
     };
   }
 
-  exportarPDF(datos);
+
+  btn.disabled = true;
+  btn.classList.add('exportando');
+  try {
+    await exportarPDF(datos);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('exportando');
+  }
 });
 
 
@@ -389,6 +407,7 @@ document.querySelectorAll('.btn-modo').forEach(btn => {
 
 let ultimoResultadoV6 = null;
 let ultimasSubredesV6 = null;
+let ultimoSvgTopologiaV6 = null;    
 
 const ipEntradaV6     = document.getElementById('ip-entrada-v6');
 const prefijoEntradaV6 = document.getElementById('prefijo-entrada-v6');
@@ -440,6 +459,16 @@ function ejecutarV6() {
   if (cant) dividirSubredesV6UI(); else limpiarTablaSubredesV6();
 }
 
+function colorTipoV6(tipo) {
+  if (tipo.includes('global'))     return 'var(--cyan)';
+  if (tipo.includes('único local')) return 'var(--green)';
+  if (tipo.includes('Link-local')) return '#ffd600';
+  if (tipo.includes('Multicast'))  return 'var(--red)';
+  if (tipo.includes('Loopback') || tipo.includes('No especificada')) return 'var(--gray)';
+  return 'var(--border)';
+}
+
+
 function renderizarV6(r) {
   document.getElementById('v6-red').textContent          = r.red + '/' + r.prefijo;
   document.getElementById('v6-red-completa').textContent = r.redCompleta;
@@ -449,26 +478,36 @@ function renderizarV6(r) {
   document.getElementById('v6-prefijo').textContent       = 'prefijo /' + r.prefijo;
   document.getElementById('v6-interfaz').textContent      = r.idInterfaz ? r.idInterfaz : 'N/A (prefijo > 64)';
 
-  renderizarBitsV6(r.prefijo);
+
+  const tarjetaTipo = document.getElementById('v6-tipo').closest('.tarjeta-resultados');
+  if (tarjetaTipo) tarjetaTipo.style.borderLeft = `3px solid ${colorTipoV6(r.tipo)}`;
+
+
+  renderizarBitsV6(r.prefijo, r.redCompleta);  
   renderizarTopologiaV6(r);
 
   document.getElementById('resultados-v6').classList.remove('hidden');
   ultimoResultadoV6 = r;
 }
 
-function renderizarBitsV6(prefijo) {
+function renderizarBitsV6(prefijo, redCompleta) {  
   const wrap = document.getElementById('binario-visual-v6');
   wrap.innerHTML = '';
+
+  
+  const hexdigitos = redCompleta.replace(/:/g, '').split('');
 
   for (let hexteto = 0; hexteto < 8; hexteto++) {
     const grupo = document.createElement('div');
     grupo.className = 'bit-group';
 
     for (let nib = 0; nib < 4; nib++) {
-      const posBit = hexteto * 16 + nib * 4;
+      const idx = hexteto * 4 + nib;            
+      const posBit = idx * 4;                     
       const el = document.createElement('div');
-      el.className = 'nibble ' + (posBit < prefijo ? 'net' : 'host');
-      el.textContent = 'x';
+      const esRed = posBit < prefijo;             
+      el.className = 'nibble ' + (esRed ? 'net' : 'host');
+      el.textContent = esRed ? hexdigitos[idx] : '0';   
       grupo.appendChild(el);
     }
     wrap.appendChild(grupo);
@@ -482,6 +521,24 @@ function renderizarBitsV6(prefijo) {
   }
 }
 
+
+function copiarAlPortapapeles(texto, btn) {
+  navigator.clipboard.writeText(texto).then(() => {
+    const original = btn.textContent;
+    btn.textContent = '✓';
+    btn.classList.add('copiado');
+    setTimeout(() => { btn.textContent = original; btn.classList.remove('copiado'); }, 1200);
+  });
+}
+
+const btnCopiarV6 = document.getElementById('btn-copiar-v6');
+if (btnCopiarV6) {
+  btnCopiarV6.addEventListener('click', () => {
+    if (!ultimoResultadoV6) return;
+    copiarAlPortapapeles(ultimoResultadoV6.red + '/' + ultimoResultadoV6.prefijo, btnCopiarV6);
+  });
+}
+
 function renderizarTopologiaV6(r) {
   const cont = document.getElementById('diagrama-topologia-v6');
   if (!cont) return;
@@ -490,7 +547,7 @@ function renderizarTopologiaV6(r) {
   else if (r.prefijo === 127) cantHosts = 2n;
   else cantHosts = r.totalDirecciones;
 
-  cont.innerHTML = generarTopologiaSVG({
+  const svg = generarTopologiaSVG({      
     cidr: r.prefijo,
     gateway: r.primeraDir,
     primerHost: r.primeraDir,
@@ -499,6 +556,8 @@ function renderizarTopologiaV6(r) {
     redLabel: r.red + '/' + r.prefijo,
     esIpv6: true,
   });
+  cont.innerHTML = svg;
+  ultimoSvgTopologiaV6 = svg;            
 }
 
 function limpiarTablaSubredesV6() {
@@ -582,7 +641,7 @@ function renderizarTablaSubredesV6(subredes, solicitadas, prefijo) {
     btn.addEventListener('click', () => {
       const s = subredes[parseInt(btn.dataset.indice)];
       const cont = document.getElementById('diagrama-topologia-v6');
-      cont.innerHTML = generarTopologiaSVG({
+      const svg = generarTopologiaSVG({      
         cidr: s.prefijo,
         gateway: s.red,
         primerHost: s.red,
@@ -591,14 +650,17 @@ function renderizarTablaSubredesV6(subredes, solicitadas, prefijo) {
         redLabel: s.red + '/' + s.prefijo,
         esIpv6: true,
       });
+      cont.innerHTML = svg;
+      ultimoSvgTopologiaV6 = svg;          
       document.getElementById('seccion-topologia').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 }
 
-document.getElementById('btn-exportar-pdf-v6').addEventListener('click', () => {
+document.getElementById('btn-exportar-pdf-v6').addEventListener('click', async (e) => { 
   if (!ultimoResultadoV6) { mostrarErrorV6('Primero calcula una subred para poder exportarla.'); return; }
   const r = ultimoResultadoV6;
+  const btn = e.currentTarget; 
 
   const campos = [
     ['Dirección de red', r.red + '/' + r.prefijo],
@@ -609,7 +671,11 @@ document.getElementById('btn-exportar-pdf-v6').addEventListener('click', () => {
     ['ID de interfaz (64 bits)', r.idInterfaz || 'N/A'],
   ];
 
-  const datos = { campos, nombreArchivo: `subred-ipv6-${r.prefijo}.pdf` };
+  const datos = {
+    campos,
+    nombreArchivo: `subred-ipv6-${r.prefijo}.pdf`,
+    topologiaSVG: ultimoSvgTopologiaV6,
+  };
 
   if (ultimasSubredesV6) {
     datos.tabla = {
@@ -619,5 +685,12 @@ document.getElementById('btn-exportar-pdf-v6').addEventListener('click', () => {
     };
   }
 
-  exportarPDF(datos);
+  btn.disabled = true;
+  btn.classList.add('exportando');
+  try {
+    await exportarPDF(datos);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('exportando');
+  }
 });

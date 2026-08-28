@@ -595,6 +595,62 @@ header {
   border-radius: 8px;
 }
 
+.btn-ver-topo, .btn-ver-topo-v6 {
+  background: transparent;
+  border: 1px solid var(--cyan);
+  border-radius: 4px;
+  padding: 4px 10px;
+  color: var(--cyan);
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-ver-topo:hover, .btn-ver-topo-v6:hover {
+  background: var(--cyan);
+  color: var(--bg);
+}
+.btn-exportar[disabled], .btn-exportar.exportando {
+  opacity: 0.55;
+  cursor: wait;
+}
+.btn-exportar.exportando::after {
+  content: '…';
+}
+
+.topo-caption {
+  letter-spacing: 0.04em;
+}
+
+.tarjeta-resultados {
+  transition: border-left-color 0.2s;
+}
+
+
+.btn-copiar {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-copiar:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+.btn-copiar.copiado { border-color: var(--green); color: var(--green); }
+.tarjeta-etiqueta { position: relative;}
+
 .bloque-mapa {
   flex: 1 1 36px;
   min-width: 36px;
