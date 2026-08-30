@@ -161,7 +161,7 @@ if (datos.topologiaSVG) {
 
 doc.setFontSize(8);
 doc.setTextColor(160, 160, 160);
-doc.text('Generado con Calculadora de Subredes · josue-dev-02.tech', margenX, 815);
+doc.text('Generado con Sub-Net FORGE · josue-dev-02.tech', margenX, 815);
 
 doc.save(datos.nombreArchivo || 'reporte-subred.pdf');
 }
