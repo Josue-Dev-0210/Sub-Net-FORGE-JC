@@ -60,6 +60,23 @@
                 </div>
             </div>
 
+            <div id="seccion-vlsm">
+                <div class="topologia-header">
+                    <h3>VLSM - Subredes de distinto tamaño</h3>
+                </div>
+                <p class="vlsm-nota">Usa la IP y el CIDR de arriba como bloque base. Agrega cada necesidad con su nombre y hosts requeridos</p>
+
+                <div id="vlsm-form">
+                    <input type="text" id="vlsm-nombre" placeholder="Nombre del host (ej. Servidor)" autocomplete="off"/>
+                    <input type="number" id="vlsm-hosts" placeholder="Hosts necesarios" min="1"/>
+                    <button id="btn-vlsm-agregar">+ Agregar</button>
+                </div>
+                <div id="vlsm-lista"></div>
+                <div id="mensaje-error-vlsm" class="hidden"></div>
+                <button id="btn-vlsm-calcular" class="btn-vlsm-calcular">Calcular VLSM</button>
+                <div id="vlsm-resultado-contenedor"></div>
+            </div>
+
             <div id="resultados" class="hidden">
                 <div id="tabla-resultados">
 

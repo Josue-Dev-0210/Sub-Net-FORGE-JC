@@ -1,9 +1,9 @@
 const PALETA_MAPA = ['#00cfff', '#00ff88', '#ffd600', '#ff4f4f', '#c17aff', '#ff9f43'];
 
 function renderizarMapaSubredes(subredes, contenedorId) {
-const cont = document.getElementById(contenedorId);
-if (!cont) return;
-cont.innerHTML = '';
+    const cont = document.getElementById(contenedorId);
+    if (!cont) return;
+    cont.innerHTML = '';
 
 subredes.forEach((s, i) => {
     const color = PALETA_MAPA[i % PALETA_MAPA.length];
@@ -15,8 +15,29 @@ subredes.forEach((s, i) => {
     bloque.title = s.red !== undefined
         ? `${s.red}/${s.cidr}\nMáscara: ${s.mascara || ''}\n${s.primerHost || s.red} — ${s.ultimoHost || s.ultima}\n${s.hostsUtil !== undefined ? s.hostsUtil + ' hosts' : s.totalFormateado + ' direcciones'}`
         : '';
-        cont.appendChild(bloque);
-    });
+    cont.appendChild(bloque);
+});
+}
+
+function renderizarMapaVLSM(resultados, contenedorId) {
+    const cont = document.getElementById(contenedorId);
+    if (!cont) return;
+    cont.innerHTML = '';
+
+const totalDirecciones = resultados.reduce((acc, r) => acc + r.tamano, 0);
+
+resultados.forEach((r, i) => {
+    const color = PALETA_MAPA[i % PALETA_MAPA.length];
+    const proporcion = Math.max(6, (r.tamano / totalDirecciones) * 100);
+    const bloque = document.createElement('div');
+    bloque.className = 'bloque-mapa bloque-mapa-vlsm';
+    bloque.style.flexGrow = proporcion;     // así se logra el ancho proporcional
+    bloque.style.borderColor = color;
+    bloque.style.background = color + '1a';
+    bloque.innerHTML = `<span class="bloque-indice" style="color:${color}">${r.nombre}</span>`;
+    bloque.title = `${r.red}/${r.prefijo}\n${r.primerHost} — ${r.ultimoHost}\n${r.hostsDisponibles} hosts disponibles`;
+    cont.appendChild(bloque);
+});
 }
 
 function svgMarkupAPng(svgMarkup, escala = 3) {
@@ -45,28 +66,28 @@ return new Promise((resolve, reject) => {
     img.onerror = (e) => {
         URL.revokeObjectURL(url);
         reject(new Error('No se pudo rasterizar el diagrama de topología.'));
-        };
-        img.src = url;
-    });
-} 
+    };
+    img.src = url;
+});
+}
 
 async function exportarPDF(datos) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
-    const margenX = 48;
-    const anchoUtil = 500;   
-    let y = 56;
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+const margenX = 48;
+const anchoUtil = 500;
+let y = 56;
 
-    doc.setFont('courier', 'bold');
-    doc.setFontSize(16);
-    doc.setTextColor(20, 20, 20);
-    doc.text('Reporte de Cálculo de Subred', margenX, y);
-    y += 14;
-    doc.setFont('courier', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text(new Date().toLocaleString('es-CO'), margenX, y);
-    y += 24;
+doc.setFont('courier', 'bold');
+doc.setFontSize(16);
+doc.setTextColor(20, 20, 20);
+doc.text('Reporte de Cálculo de Subred', margenX, y);
+y += 14;
+doc.setFont('courier', 'normal');
+doc.setFontSize(9);
+doc.setTextColor(120, 120, 120);
+doc.text(new Date().toLocaleString('es-CO'), margenX, y);
+y += 24;
 
 doc.setDrawColor(220, 220, 220);
 doc.line(margenX, y, 548, y);
@@ -124,17 +145,17 @@ if (datos.topologiaSVG) {
     if (img) {
         y += 20;
         const altoImg = anchoUtil * (img.alto / img.ancho);
-            asegurarEspacio(altoImg + 40);
-            doc.setFont('courier', 'bold');
-            doc.setFontSize(11);
-            doc.setTextColor(20, 20, 20);
-            doc.text('Topología de Red', margenX, y);
-            y += 12;
-            doc.addImage(img.dataUrl, 'PNG', margenX, y, anchoUtil, altoImg);
-            y += altoImg + 10;
+        asegurarEspacio(altoImg + 40);
+        doc.setFont('courier', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(20, 20, 20);
+        doc.text('Topología de Red', margenX, y);
+        y += 12;
+        doc.addImage(img.dataUrl, 'PNG', margenX, y, anchoUtil, altoImg);
+        y += altoImg + 10;
         }
     } catch (e) {
-        console.warn('No se pudo incluir la topología en el PDF:', e.message);
+    console.warn('No se pudo incluir la topología en el PDF:', e.message);
     }
 }
 
@@ -143,4 +164,4 @@ doc.setTextColor(160, 160, 160);
 doc.text('Generado con Calculadora de Subredes · josue-dev-02.tech', margenX, 815);
 
 doc.save(datos.nombreArchivo || 'reporte-subred.pdf');
-    }
+}

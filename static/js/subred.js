@@ -694,3 +694,177 @@ document.getElementById('btn-exportar-pdf-v6').addEventListener('click', async (
     btn.classList.remove('exportando');
   }
 });
+
+function hostsAPrefijoVLSM(hostsNecesarios) {
+  const h = Math.max(2, Math.ceil(Math.log2(Math.max(1, hostsNecesarios) + 2)));
+  return 32 - h;
+}
+
+function calcularVLSM(ipBase, cidrBase, solicitudes) {
+  const ordenadas = solicitudes
+  .map((s, i) => ({ ...s, ordenOriginal: i}))
+  .sort((a, b) => b.hosts - a.hosts);
+
+  const redBaseInt = (ipAEntero(ipBase) & cidrAMascara(cidrBase)) >>> 0;
+  const totalDisponible = Math.pow(2, 32 - cidrBase);
+  const limite = redBaseInt + totalDisponible;
+
+  let cursor = redBaseInt;
+  const resultados = [];
+
+  for (const s of ordenadas) {
+    const prefijo = hostsAPrefijoVLSM(s.hosts);
+    if (prefijo < cidrBase) {
+      throw new Error(`"${s.nombre}" necesita ${s.hosts} hosts - no caben en todo el bloque /${cidrBase}.`);
+    }
+    const tamano = Math.pow(2, 32 - prefijo);
+
+    const alineado = Math.ceil(cursor / tamano) * tamano;
+    if (alineado + tamano > limite) {
+      throw new Error(`No hay espacio suficiente para "${s.nombre}" (necesita /${prefijo}) dentro de ${ipBase}/${cidrBase}. Prueba con un bloque mas grande.`);
+    }
+
+    const redInt = alineado;
+    const difusionInt = redInt + tamano - 1;
+    resultados.push({
+      nombre: s.nombre,
+      hostsSolicitados: s.hosts,
+      prefijo,
+      red: enteroAIp(cidrAMascara(prefijo)),
+      primerHost: enteroAIp(prefijo < 31 ? redInt + 1 : redInt),
+      ultimoHost: enteroAIp(prefijo < 31 ? difusionInt - 1 : difusionInt),
+      difusion: enteroAIp(difusionInt),
+      hostsDisponibles: prefijo >= 31 ? tamano : tamano - 2,
+      tamano,
+      ordenOriginal: s.ordenOriginal,
+    });
+    cursor = redInt + tamano;
+  }
+
+  resultados.sort((a, b) => a.ordenOriginal - b.ordenOriginal);
+  return resultados;
+}
+
+let vlsmSolicitudes = [];   
+let ultimoResultadoVLSM = null;   
+
+const vlsmNombreInput = document.getElementById('vlsm-nombre');
+const vlsmHostsInput  = document.getElementById('vlsm-hosts');
+const mensajeErrorVLSM = document.getElementById('mensaje-error-vlsm');
+
+function mostrarErrorVLSM(msg) {
+  mensajeErrorVLSM.textContent = msg;
+  mensajeErrorVLSM.classList.remove('hidden');
+}
+function limpiarErrorVLSM() {
+  mensajeErrorVLSM.classList.add('hidden');
+}
+function renderizarListaVLSM() {
+  const cont = document.getElementById('vlsm-lista');
+  cont.innerHTML = '';
+  vlsmSolicitudes.forEach((s, i) => {
+    const fila = document.createElement('div');
+    fila.className = 'vlsm-item';
+    fila.innerHTML = `
+      <span class="vlsm-item-nombre">${s.nombre}</span>
+      <span class="vlsm-item-hosts">${s.hosts} hosts</span>
+      <button class="vlsm-item-quitar" data-i="${i}" title="Quitar">×</button>
+    `;
+    cont.appendChild(fila);
+  });
+cont.querySelectorAll('.vlsm-item-quitar').forEach(btn => {
+    btn.addEventListener('click', () => {
+      vlsmSolicitudes.splice(parseInt(btn.dataset.i), 1);   
+      renderizarListaVLSM();                                
+    });
+  });
+}
+document.getElementById('btn-vlsm-agregar').addEventListener('click', () => {
+const hosts = parseInt(vlsmHostsInput.value);
+  if (isNaN(hosts) || hosts < 1) { mostrarErrorVLSM('Ingresa cuántos hosts necesita esta subred (mínimo 1).'); return; }
+const nombre = vlsmNombreInput.value.trim() || `Subred ${vlsmSolicitudes.length + 1}`;   
+
+limpiarErrorVLSM();
+  vlsmSolicitudes.push({ nombre, hosts });
+renderizarListaVLSM();
+  vlsmNombreInput.value = '';
+  vlsmHostsInput.value = '';
+  vlsmNombreInput.focus();   
+});
+[vlsmNombreInput, vlsmHostsInput].forEach(input => {
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('btn-vlsm-agregar').click();
+  });
+});
+document.getElementById('btn-vlsm-calcular').addEventListener('click', () => {
+  const ip = ipEntrada.value.trim();
+  const cidr = cidrEntrada.value.trim();
+  const errBase = validar(ip, cidr);  
+if (errBase) { mostrarErrorVLSM('Revisa la IP/CIDR base arriba: ' + errBase); return; }
+
+if (vlsmSolicitudes.length === 0) {
+    mostrarErrorVLSM('Agrega al menos una subred con sus hosts necesarios.');
+    return;
+  }
+
+let resultados;
+  try {
+    resultados = calcularVLSM(ip, parseInt(cidr), vlsmSolicitudes);
+  } catch (e) {
+    mostrarErrorVLSM(e.message);   
+    return;
+  }
+
+limpiarErrorVLSM();
+  ultimoResultadoVLSM = resultados;
+  renderizarResultadoVLSM(resultados, ip, cidr);
+});
+function renderizarResultadoVLSM(resultados, ipBase, cidrBase) {
+  const contenedor = document.getElementById('vlsm-resultado-contenedor');
+  contenedor.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.id = 'tabla-subredes-wrap';
+  wrap.innerHTML = `
+    <div id="mapa-vlsm"></div>
+    <div id="tabla-subredes-header">
+      <h3>asignación VLSM</h3>
+      <span id="tabla-subredes-meta">
+        bloque base: <b>${ipBase}/${cidrBase}</b> &nbsp;·&nbsp;
+        subredes: <b>${resultados.length}</b>
+      </span>
+    </div>
+    <div id="tabla-subredes-scroll">
+      <table id="tabla-subredes">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Pedidos</th>
+            <th>Red</th>
+            <th>Máscara</th>
+            <th>Rango</th>
+            <th>Difusión</th>
+            <th>Hosts</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-vlsm-body"></tbody>
+      </table>
+    </div>
+  `;
+  contenedor.appendChild(wrap);
+  renderizarMapaVLSM(resultados, 'mapa-vlsm');
+
+  const tbody = document.getElementById('tabla-vlsm-body');
+  resultados.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-red">${r.nombre}</td>
+      <td class="td-indice">${r.hostsSolicitados}</td>
+      <td class="td-red">${r.red}/${r.prefijo}</td>
+      <td class="td-mask">${r.mascara}</td>
+      <td class="td-host">${r.primerHost} — ${r.ultimoHost}</td>
+      <td class="td-bcast">${r.difusion}</td>
+      <td class="td-count">${r.hostsDisponibles}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}

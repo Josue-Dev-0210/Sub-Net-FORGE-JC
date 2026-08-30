@@ -595,6 +595,21 @@ header {
   border-radius: 8px;
 }
 
+.bloque-mapa {
+  flex: 1 1 36px;
+  min-width: 36px;
+  height: 40px;
+  border: 1px solid;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  transition: transform 0.1s;
+}
+.bloque-mapa:hover { transform: translateY(-2px); }
+.bloque-indice { font-size: 10px; font-weight: bold; }
+
 .btn-ver-topo, .btn-ver-topo-v6 {
   background: transparent;
   border: 1px solid var(--cyan);
@@ -651,17 +666,135 @@ header {
 .btn-copiar.copiado { border-color: var(--green); color: var(--green); }
 .tarjeta-etiqueta { position: relative;}
 
-.bloque-mapa {
-  flex: 1 1 36px;
-  min-width: 36px;
-  height: 40px;
-  border: 1px solid;
-  border-radius: 4px;
+#seccion-vlsm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vlsm-nota {
+  font-size: 11px;
+  color: var(--gray);
+}
+
+#vlsm-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#vlsm-nombre {
+  flex: 1;
+  min-width: 160px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--white);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#vlsm-nombre:focus { border-color: var(--cyan); }
+
+#vlsm-hosts {
+  width: 130px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--white);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#vlsm-hosts:focus { border-color: var(--cyan); }
+
+#btn-vlsm-agregar {
+  background: var(--cyan);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: var(--bg);
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+#btn-vlsm-agregar:hover { opacity: 0.85; }
+
+#vlsm-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vlsm-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: default;
-  transition: transform 0.1s;
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  animation: fadeIn 0.2s ease;
 }
-.bloque-mapa:hover { transform: translateY(-2px); }
-.bloque-indice { font-size: 10px; font-weight: bold; }
+
+.vlsm-item-nombre { color: var(--white); font-weight: bold; flex: 1; }
+.vlsm-item-hosts { color: var(--gray); }
+
+.vlsm-item-quitar {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  color: var(--red);
+  cursor: pointer;
+  line-height: 1;
+  transition: border-color 0.15s;
+}
+
+.vlsm-item-quitar:hover { border-color: var(--red); }
+
+.btn-vlsm-calcular {
+  background: var(--green);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  color: var(--bg);
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: opacity 0.2s;
+}
+
+.btn-vlsm-calcular:hover { opacity: 0.85s; }
+
+.bloque-mapa-vlsm {
+  flex-grow: 1;
+  flex-basis: 60px;
+  min-width: 60px;
+}
+
+.bloque-mapa-vlsm .bloque-indice {
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 40px; 
+}
