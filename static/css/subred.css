@@ -520,7 +520,7 @@ header {
 .nibble.host { background: #00ff8822; color: var(--green); border: 1px solid #00ff8844; }
 
 
-#seccion-topologia {
+#seccion-topologia, #seccion-topologia-vlsm {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -622,11 +622,11 @@ header {
   white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
-
 .btn-ver-topo:hover, .btn-ver-topo-v6:hover {
   background: var(--cyan);
   color: var(--bg);
 }
+
 .btn-exportar[disabled], .btn-exportar.exportando {
   opacity: 0.55;
   cursor: wait;
@@ -643,7 +643,6 @@ header {
   transition: border-left-color 0.2s;
 }
 
-
 .btn-copiar {
   margin-left: auto;
   background: transparent;
@@ -658,13 +657,10 @@ header {
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
-
-.btn-copiar:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
-}
+.btn-copiar:hover { border-color: var(--cyan); color: var(--cyan); }
 .btn-copiar.copiado { border-color: var(--green); color: var(--green); }
-.tarjeta-etiqueta { position: relative;}
+
+.tarjeta-etiqueta { position: relative; }
 
 #seccion-vlsm {
   background: var(--surface);
@@ -700,7 +696,6 @@ header {
   outline: none;
   transition: border-color 0.2s;
 }
-
 #vlsm-nombre:focus { border-color: var(--cyan); }
 
 #vlsm-hosts {
@@ -715,7 +710,6 @@ header {
   outline: none;
   transition: border-color 0.2s;
 }
-
 #vlsm-hosts:focus { border-color: var(--cyan); }
 
 #btn-vlsm-agregar {
@@ -731,7 +725,6 @@ header {
   white-space: nowrap;
   transition: opacity 0.2s;
 }
-
 #btn-vlsm-agregar:hover { opacity: 0.85; }
 
 #vlsm-lista {
@@ -766,7 +759,6 @@ header {
   line-height: 1;
   transition: border-color 0.15s;
 }
-
 .vlsm-item-quitar:hover { border-color: var(--red); }
 
 .btn-vlsm-calcular {
@@ -782,19 +774,17 @@ header {
   align-self: flex-start;
   transition: opacity 0.2s;
 }
-
-.btn-vlsm-calcular:hover { opacity: 0.85s; }
+.btn-vlsm-calcular:hover { opacity: 0.85; }
 
 .bloque-mapa-vlsm {
   flex-grow: 1;
   flex-basis: 60px;
   min-width: 60px;
 }
-
 .bloque-mapa-vlsm .bloque-indice {
   font-size: 9px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 40px; 
+  padding: 0 4px;
 }

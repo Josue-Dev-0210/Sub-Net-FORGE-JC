@@ -159,7 +159,7 @@ function renderizarSaltoRed(r) {
 function renderizarTopologiaV4(r) {
   const cont = document.getElementById('diagrama-topologia-v4');
   if (!cont) return;
-  const svg = generarTopologiaSVG({         
+  const svg = generarTopologiaSVG({
     cidr: r.cidr,
     gateway: r.primerHost,
     primerHost: r.primerHost,
@@ -168,11 +168,11 @@ function renderizarTopologiaV4(r) {
     redLabel: r.red + '/' + r.cidr,
   });
   cont.innerHTML = svg;
-  ultimoSvgTopologiaV4 = svg;                
+  ultimoSvgTopologiaV4 = svg;
 }
 let ultimoResultadoV4 = null;
 let ultimasSubredesV4 = null;
-let ultimoSvgTopologiaV4 = null;            
+let ultimoSvgTopologiaV4 = null;
 
 const ipEntrada   = document.getElementById('ip-entrada');
 const cidrEntrada = document.getElementById('cidr-entrada');
@@ -216,7 +216,7 @@ function ejecutar() {
 
   const cant = document.getElementById('num-subredes').value;
 
-  if (cant) dividirSubredes(); else limpiarTablaSubredes();
+  if (cant) dividirSubredes(); else limpiarTablaSubredes();  // ►►► NUEVO el "else limpiarTablaSubredes();"
 }
 
 function limpiarTablaSubredes() {
@@ -331,7 +331,7 @@ function renderizarTablaSubredes(subredes, solicitadas, cidr) {
     btn.addEventListener('click', () => {
       const s = subredes[parseInt(btn.dataset.indice)];
       const cont = document.getElementById('diagrama-topologia-v4');
-      const svg = generarTopologiaSVG({     
+      const svg = generarTopologiaSVG({
         cidr: s.cidr,
         gateway: s.primerHost,
         primerHost: s.primerHost,
@@ -340,7 +340,7 @@ function renderizarTablaSubredes(subredes, solicitadas, cidr) {
         redLabel: s.red + '/' + s.cidr,
       });
       cont.innerHTML = svg;
-      ultimoSvgTopologiaV4 = svg;            
+      ultimoSvgTopologiaV4 = svg;
       document.getElementById('seccion-topologia').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
@@ -352,10 +352,10 @@ document.getElementById('num-subredes').addEventListener('keydown', e => {
 });
 
 
-document.getElementById('btn-exportar-pdf-v4').addEventListener('click', async (e) => { 
+document.getElementById('btn-exportar-pdf-v4').addEventListener('click', async (e) => {
   if (!ultimoResultadoV4) { mostrarError('Primero calcula una subred para poder exportarla.'); return; }
   const r = ultimoResultadoV4;
-  const btn = e.currentTarget;             
+  const btn = e.currentTarget;
 
   const campos = [
     ['Dirección de red', r.red + '/' + r.cidr],
@@ -370,7 +370,7 @@ document.getElementById('btn-exportar-pdf-v4').addEventListener('click', async (
   const datos = {
     campos,
     nombreArchivo: `subred-${r.red.replace(/\./g, '-')}-${r.cidr}.pdf`,
-    topologiaSVG: ultimoSvgTopologiaV4,      
+    topologiaSVG: ultimoSvgTopologiaV4,
   };
 
   if (ultimasSubredesV4) {
@@ -382,7 +382,6 @@ document.getElementById('btn-exportar-pdf-v4').addEventListener('click', async (
       ]),
     };
   }
-
 
   btn.disabled = true;
   btn.classList.add('exportando');
@@ -407,7 +406,7 @@ document.querySelectorAll('.btn-modo').forEach(btn => {
 
 let ultimoResultadoV6 = null;
 let ultimasSubredesV6 = null;
-let ultimoSvgTopologiaV6 = null;    
+let ultimoSvgTopologiaV6 = null;
 
 const ipEntradaV6     = document.getElementById('ip-entrada-v6');
 const prefijoEntradaV6 = document.getElementById('prefijo-entrada-v6');
@@ -468,7 +467,6 @@ function colorTipoV6(tipo) {
   return 'var(--border)';
 }
 
-
 function renderizarV6(r) {
   document.getElementById('v6-red').textContent          = r.red + '/' + r.prefijo;
   document.getElementById('v6-red-completa').textContent = r.redCompleta;
@@ -478,23 +476,20 @@ function renderizarV6(r) {
   document.getElementById('v6-prefijo').textContent       = 'prefijo /' + r.prefijo;
   document.getElementById('v6-interfaz').textContent      = r.idInterfaz ? r.idInterfaz : 'N/A (prefijo > 64)';
 
-
   const tarjetaTipo = document.getElementById('v6-tipo').closest('.tarjeta-resultados');
   if (tarjetaTipo) tarjetaTipo.style.borderLeft = `3px solid ${colorTipoV6(r.tipo)}`;
 
-
-  renderizarBitsV6(r.prefijo, r.redCompleta);  
+  renderizarBitsV6(r.prefijo, r.redCompleta);
   renderizarTopologiaV6(r);
 
   document.getElementById('resultados-v6').classList.remove('hidden');
   ultimoResultadoV6 = r;
 }
 
-function renderizarBitsV6(prefijo, redCompleta) {  
+function renderizarBitsV6(prefijo, redCompleta) {
   const wrap = document.getElementById('binario-visual-v6');
   wrap.innerHTML = '';
 
-  
   const hexdigitos = redCompleta.replace(/:/g, '').split('');
 
   for (let hexteto = 0; hexteto < 8; hexteto++) {
@@ -502,12 +497,12 @@ function renderizarBitsV6(prefijo, redCompleta) {
     grupo.className = 'bit-group';
 
     for (let nib = 0; nib < 4; nib++) {
-      const idx = hexteto * 4 + nib;            
-      const posBit = idx * 4;                     
+      const idx = hexteto * 4 + nib;
+      const posBit = idx * 4;
       const el = document.createElement('div');
-      const esRed = posBit < prefijo;             
+      const esRed = posBit < prefijo;
       el.className = 'nibble ' + (esRed ? 'net' : 'host');
-      el.textContent = esRed ? hexdigitos[idx] : '0';   
+      el.textContent = esRed ? hexdigitos[idx] : '0';
       grupo.appendChild(el);
     }
     wrap.appendChild(grupo);
@@ -520,7 +515,6 @@ function renderizarBitsV6(prefijo, redCompleta) {
     }
   }
 }
-
 
 function copiarAlPortapapeles(texto, btn) {
   navigator.clipboard.writeText(texto).then(() => {
@@ -547,7 +541,7 @@ function renderizarTopologiaV6(r) {
   else if (r.prefijo === 127) cantHosts = 2n;
   else cantHosts = r.totalDirecciones;
 
-  const svg = generarTopologiaSVG({      
+  const svg = generarTopologiaSVG({
     cidr: r.prefijo,
     gateway: r.primeraDir,
     primerHost: r.primeraDir,
@@ -557,7 +551,7 @@ function renderizarTopologiaV6(r) {
     esIpv6: true,
   });
   cont.innerHTML = svg;
-  ultimoSvgTopologiaV6 = svg;            
+  ultimoSvgTopologiaV6 = svg;
 }
 
 function limpiarTablaSubredesV6() {
@@ -641,7 +635,7 @@ function renderizarTablaSubredesV6(subredes, solicitadas, prefijo) {
     btn.addEventListener('click', () => {
       const s = subredes[parseInt(btn.dataset.indice)];
       const cont = document.getElementById('diagrama-topologia-v6');
-      const svg = generarTopologiaSVG({      
+      const svg = generarTopologiaSVG({
         cidr: s.prefijo,
         gateway: s.red,
         primerHost: s.red,
@@ -651,16 +645,16 @@ function renderizarTablaSubredesV6(subredes, solicitadas, prefijo) {
         esIpv6: true,
       });
       cont.innerHTML = svg;
-      ultimoSvgTopologiaV6 = svg;          
+      ultimoSvgTopologiaV6 = svg;
       document.getElementById('seccion-topologia').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
 }
 
-document.getElementById('btn-exportar-pdf-v6').addEventListener('click', async (e) => { 
+document.getElementById('btn-exportar-pdf-v6').addEventListener('click', async (e) => {
   if (!ultimoResultadoV6) { mostrarErrorV6('Primero calcula una subred para poder exportarla.'); return; }
   const r = ultimoResultadoV6;
-  const btn = e.currentTarget; 
+  const btn = e.currentTarget;
 
   const campos = [
     ['Dirección de red', r.red + '/' + r.prefijo],
@@ -694,7 +688,6 @@ document.getElementById('btn-exportar-pdf-v6').addEventListener('click', async (
     btn.classList.remove('exportando');
   }
 });
-
 function hostsAPrefijoVLSM(hostsNecesarios) {
   const h = Math.max(2, Math.ceil(Math.log2(Math.max(1, hostsNecesarios) + 2)));
   return 32 - h;
@@ -702,26 +695,26 @@ function hostsAPrefijoVLSM(hostsNecesarios) {
 
 function calcularVLSM(ipBase, cidrBase, solicitudes) {
   const ordenadas = solicitudes
-  .map((s, i) => ({ ...s, ordenOriginal: i}))
-  .sort((a, b) => b.hosts - a.hosts);
+    .map((s, i) => ({ ...s, ordenOriginal: i }))  
+    .sort((a, b) => b.hosts - a.hosts);
 
   const redBaseInt = (ipAEntero(ipBase) & cidrAMascara(cidrBase)) >>> 0;
   const totalDisponible = Math.pow(2, 32 - cidrBase);
-  const limite = redBaseInt + totalDisponible;
+  const limite = redBaseInt + totalDisponible;   
 
-  let cursor = redBaseInt;
+  let cursor = redBaseInt;   
   const resultados = [];
 
   for (const s of ordenadas) {
     const prefijo = hostsAPrefijoVLSM(s.hosts);
     if (prefijo < cidrBase) {
-      throw new Error(`"${s.nombre}" necesita ${s.hosts} hosts - no caben en todo el bloque /${cidrBase}.`);
+      throw new Error(`"${s.nombre}" necesita ${s.hosts} hosts — no caben ni en todo el bloque /${cidrBase}.`);
     }
     const tamano = Math.pow(2, 32 - prefijo);
 
     const alineado = Math.ceil(cursor / tamano) * tamano;
     if (alineado + tamano > limite) {
-      throw new Error(`No hay espacio suficiente para "${s.nombre}" (necesita /${prefijo}) dentro de ${ipBase}/${cidrBase}. Prueba con un bloque mas grande.`);
+      throw new Error(`No hay espacio suficiente para "${s.nombre}" (necesita /${prefijo}) dentro de ${ipBase}/${cidrBase}. Prueba con un bloque base más grande.`);
     }
 
     const redInt = alineado;
@@ -730,15 +723,16 @@ function calcularVLSM(ipBase, cidrBase, solicitudes) {
       nombre: s.nombre,
       hostsSolicitados: s.hosts,
       prefijo,
-      red: enteroAIp(cidrAMascara(prefijo)),
+      red: enteroAIp(redInt),
+      mascara: enteroAIp(cidrAMascara(prefijo)),
       primerHost: enteroAIp(prefijo < 31 ? redInt + 1 : redInt),
       ultimoHost: enteroAIp(prefijo < 31 ? difusionInt - 1 : difusionInt),
       difusion: enteroAIp(difusionInt),
       hostsDisponibles: prefijo >= 31 ? tamano : tamano - 2,
-      tamano,
+      tamano,   
       ordenOriginal: s.ordenOriginal,
     });
-    cursor = redInt + tamano;
+    cursor = redInt + tamano; 
   }
 
   resultados.sort((a, b) => a.ordenOriginal - b.ordenOriginal);
@@ -746,7 +740,8 @@ function calcularVLSM(ipBase, cidrBase, solicitudes) {
 }
 
 let vlsmSolicitudes = [];   
-let ultimoResultadoVLSM = null;   
+let ultimoResultadoVLSM = null;  
+let ultimoSvgTopologiaVLSM = null;
 
 const vlsmNombreInput = document.getElementById('vlsm-nombre');
 const vlsmHostsInput  = document.getElementById('vlsm-hosts');
@@ -772,56 +767,63 @@ function renderizarListaVLSM() {
     `;
     cont.appendChild(fila);
   });
-cont.querySelectorAll('.vlsm-item-quitar').forEach(btn => {
+
+  cont.querySelectorAll('.vlsm-item-quitar').forEach(btn => {
     btn.addEventListener('click', () => {
       vlsmSolicitudes.splice(parseInt(btn.dataset.i), 1);   
       renderizarListaVLSM();                                
     });
   });
 }
-document.getElementById('btn-vlsm-agregar').addEventListener('click', () => {
-const hosts = parseInt(vlsmHostsInput.value);
-  if (isNaN(hosts) || hosts < 1) { mostrarErrorVLSM('Ingresa cuántos hosts necesita esta subred (mínimo 1).'); return; }
-const nombre = vlsmNombreInput.value.trim() || `Subred ${vlsmSolicitudes.length + 1}`;   
 
-limpiarErrorVLSM();
+
+document.getElementById('btn-vlsm-agregar').addEventListener('click', () => {
+  const hosts = parseInt(vlsmHostsInput.value);
+  if (isNaN(hosts) || hosts < 1) { mostrarErrorVLSM('Ingresa cuántos hosts necesita esta subred (mínimo 1).'); return; }
+  const nombre = vlsmNombreInput.value.trim() || `Subred ${vlsmSolicitudes.length + 1}`;   // nombre por defecto si lo dejan vacío
+
+  limpiarErrorVLSM();
   vlsmSolicitudes.push({ nombre, hosts });
-renderizarListaVLSM();
+  renderizarListaVLSM();
   vlsmNombreInput.value = '';
   vlsmHostsInput.value = '';
   vlsmNombreInput.focus();   
 });
+
+
 [vlsmNombreInput, vlsmHostsInput].forEach(input => {
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('btn-vlsm-agregar').click();
   });
 });
+
 document.getElementById('btn-vlsm-calcular').addEventListener('click', () => {
   const ip = ipEntrada.value.trim();
   const cidr = cidrEntrada.value.trim();
-  const errBase = validar(ip, cidr);  
-if (errBase) { mostrarErrorVLSM('Revisa la IP/CIDR base arriba: ' + errBase); return; }
+  const errBase = validar(ip, cidr);   
+  if (errBase) { mostrarErrorVLSM('Revisa la IP/CIDR base arriba: ' + errBase); return; }
 
-if (vlsmSolicitudes.length === 0) {
+  if (vlsmSolicitudes.length === 0) {
     mostrarErrorVLSM('Agrega al menos una subred con sus hosts necesarios.');
     return;
   }
 
-let resultados;
+  let resultados;
   try {
     resultados = calcularVLSM(ip, parseInt(cidr), vlsmSolicitudes);
   } catch (e) {
-    mostrarErrorVLSM(e.message);   
+    mostrarErrorVLSM(e.message);  
     return;
   }
 
-limpiarErrorVLSM();
+  limpiarErrorVLSM();
   ultimoResultadoVLSM = resultados;
   renderizarResultadoVLSM(resultados, ip, cidr);
 });
 function renderizarResultadoVLSM(resultados, ipBase, cidrBase) {
   const contenedor = document.getElementById('vlsm-resultado-contenedor');
   contenedor.innerHTML = '';
+
   const wrap = document.createElement('div');
   wrap.id = 'tabla-subredes-wrap';
   wrap.innerHTML = `
@@ -849,9 +851,23 @@ function renderizarResultadoVLSM(resultados, ipBase, cidrBase) {
         <tbody id="tabla-vlsm-body"></tbody>
       </table>
     </div>
+    <div id="seccion-topologia-vlsm">
+      <div class="topologia-header">
+        <h3>Topología Unificada</h3>
+        <button class="btn-exportar" id="btn-exportar-pdf-vlsm">
+          <svg width="13" height="13" viewBox="0 0 32 32" fill="none"><path d="M8 4h12l6 6v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" stroke="#ff4f4f" stroke-width="1.5"/><path d="M16 12v10M16 22l-4-4M16 22l4-4" stroke="#ff4f4f" stroke-width="1.5"/></svg>
+          Exportar PDF
+        </button>
+      </div>
+      <div id="diagrama-topologia-vlsm" class="diagrama-topologia"></div>
+    </div>
   `;
   contenedor.appendChild(wrap);
   renderizarMapaVLSM(resultados, 'mapa-vlsm');
+
+  const svgVLSM = generarTopologiaVLSM(resultados);
+  document.getElementById('diagrama-topologia-vlsm').innerHTML = svgVLSM;
+  ultimoSvgTopologiaVLSM = svgVLSM;
 
   const tbody = document.getElementById('tabla-vlsm-body');
   resultados.forEach(r => {
@@ -866,5 +882,30 @@ function renderizarResultadoVLSM(resultados, ipBase, cidrBase) {
       <td class="td-count">${r.hostsDisponibles}</td>
     `;
     tbody.appendChild(tr);
+  });
+
+  document.getElementById('btn-exportar-pdf-vlsm').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const datos = {
+      campos: [
+        ['Bloque base', `${ipBase}/${cidrBase}`],
+        ['Subredes asignadas', resultados.length],
+      ],
+      nombreArchivo: `vlsm-${ipBase.replace(/\./g, '-')}-${cidrBase}.pdf`,
+      topologiaSVG: ultimoSvgTopologiaVLSM,
+      tabla: {
+        titulo: 'Asignación VLSM',
+        encabezados: ['Nombre', 'Red', 'Rango', 'Hosts'],
+        filas: resultados.map(r => [r.nombre, r.red + '/' + r.prefijo, `${r.primerHost}-${r.ultimoHost}`, r.hostsDisponibles]),
+      },
+    };
+    btn.disabled = true;
+    btn.classList.add('exportando');
+    try {
+      await exportarPDF(datos);
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('exportando');
+    }
   });
 }

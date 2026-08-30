@@ -52,8 +52,8 @@ return `
 }
 
 function svgLinea(x1, y1, x2, y2, punteada = false) {
-const dash = punteada ? ' stroke-dasharray="4 3"' : '';
-return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COLORES_TOPO.gray}" stroke-width="1.5"${dash}/>`;
+    const dash = punteada ? ' stroke-dasharray="4 3"' : '';
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${COLORES_TOPO.gray}" stroke-width="1.5"${dash}/>`;
 }
 
 function svgCaption(texto, x = 200, y = 20) {
@@ -80,7 +80,7 @@ function topologiaLanPequena(gatewayIp, ultimoHostIp, cantHosts, redLabel) {
 const w = 400, h = 280;
 const maxMostrar = Math.min(cantHosts, 6);
 const inicioX = 75;
-    const anchoUtil = w - 2 * inicioX;
+const anchoUtil = w - 2 * inicioX;
 const espacio = maxMostrar > 1 ? anchoUtil / (maxMostrar - 1) : 0;
 
 let hosts = '';
@@ -118,11 +118,60 @@ return `
         ${svgSwitch(200, 132, '')}
         ${svgLinea(200, 145, 200, 180)}
         <g transform="translate(120,182)">
-            <rect x="0" y="0" width="160" height="66" rx="6" fill="${COLORES_TOPO.surface}" stroke="${COLORES_TOPO.yellow}" stroke-width="1.5" stroke-dasharray="5 3"/>
-            <text font-family="Courier New, monospace" font-size="11" x="80" y="26" text-anchor="middle" class="topo-label" fill="${COLORES_TOPO.yellow}">${etiquetaCantidad}</text>
-            <text font-family="Courier New, monospace" font-size="8" x="80" y="44" text-anchor="middle" class="topo-sub-label" fill="${COLORES_TOPO.gray}">${primerHostIp} — ${ultimoHostIp}</text>
+        <rect x="0" y="0" width="160" height="66" rx="6" fill="${COLORES_TOPO.surface}" stroke="${COLORES_TOPO.yellow}" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text font-family="Courier New, monospace" font-size="11" x="80" y="26" text-anchor="middle" class="topo-label" fill="${COLORES_TOPO.yellow}">${etiquetaCantidad}</text>
+        <text font-family="Courier New, monospace" font-size="8" x="80" y="44" text-anchor="middle" class="topo-sub-label" fill="${COLORES_TOPO.gray}">${primerHostIp} — ${ultimoHostIp}</text>
         </g>
         <text font-family="Courier New, monospace" font-size="9" x="200" y="267" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">gateway: ${gatewayIp}</text>
+    </svg>`;
+}
+function generarTopologiaVLSM(resultados) {
+const maxMostrar = Math.min(resultados.length, 6);
+const w = 480, h = 300;
+const inicioX = 65;
+const anchoUtil = w - 2 * inicioX;
+const espacio = maxMostrar > 1 ? anchoUtil / (maxMostrar - 1) : 0;
+
+const yHub = 45;
+const yTrunco = 95;
+const yIcono = 190;
+
+let radios = '';
+let lineas = '';
+
+for (let i = 0; i < maxMostrar; i++) {
+    const x = maxMostrar === 1 ? w / 2 : inicioX + i * espacio;
+    const r = resultados[i];
+    const esEnlace = r.hostsDisponibles <= 2;
+
+    lineas += svgLinea(w / 2, yTrunco, x, yIcono - 20, true);
+
+    if (esEnlace) {
+        radios += svgRouter(x, yIcono, '', COLORES_TOPO.yellow);
+    } else {
+        radios += svgSwitch(x, yIcono, '', COLORES_TOPO.green);
+    }
+
+    const colorEtiqueta = esEnlace ? COLORES_TOPO.yellow : COLORES_TOPO.green;
+    const detalle = esEnlace ? 'enlace WAN' : `${r.hostsDisponibles} hosts`;
+    radios += `
+        <text font-family="Courier New, monospace" font-size="9" x="${x}" y="${yIcono - 34}" text-anchor="middle" fill="${colorEtiqueta}">${r.nombre}</text>
+        <text font-family="Courier New, monospace" font-size="8" x="${x}" y="${yIcono + 34}" text-anchor="middle" fill="${COLORES_TOPO.gray}">${r.red}/${r.prefijo}</text>
+        <text font-family="Courier New, monospace" font-size="8" x="${x}" y="${yIcono + 46}" text-anchor="middle" fill="${COLORES_TOPO.gray}">${detalle}</text>`;
+}
+
+const extra = resultados.length > maxMostrar
+    ? `<text font-family="Courier New, monospace" font-size="9" x="${w / 2}" y="${h - 8}" text-anchor="middle" fill="${COLORES_TOPO.gray}">+${resultados.length - maxMostrar} subredes adicionales no mostradas</text>`
+    : '';
+
+return `
+    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+        ${svgCaption('Topología VLSM · ' + resultados.length + ' subredes', w / 2)}
+        ${svgRouter(w / 2, yHub, 'Router principal')}
+        ${svgLinea(w / 2, yHub + 18, w / 2, yTrunco)}
+        ${lineas}
+        ${radios}
+        ${extra}
     </svg>`;
 }
 
@@ -130,20 +179,20 @@ function generarTopologiaSVG({ tipo, cidr, gateway, primerHost, ultimoHost, cant
 const esCero = typeof cantHosts === 'bigint' ? cantHosts <= 0n : cantHosts <= 0;
 if (esCero) {
     return `<svg viewBox="0 0 400 110" width="400" height="110" xmlns="http://www.w3.org/2000/svg">
-            ${svgCaption('Bloque /' + cidr)}
-            <text font-family="Courier New, monospace" font-size="9" x="200" y="60" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">Sin hosts utilizables (identificador o dirección única)</text>
-        </svg>`;
-    }
+                ${svgCaption('Bloque /' + cidr)}
+                <text font-family="Courier New, monospace" font-size="9" x="200" y="60" text-anchor="middle" class="topo-link-label" fill="${COLORES_TOPO.gray}">Sin hosts utilizables (identificador o dirección única)</text>
+            </svg>`;
+}
 const esDos = typeof cantHosts === 'bigint' ? cantHosts === 2n : cantHosts === 2;
 if (esDos) {
     return topologiaPuntoAPunto(primerHost, ultimoHost, redLabel);
-    }
+}
 const esGrande = typeof cantHosts === 'bigint' ? cantHosts > 6n : cantHosts > 6;
 if (esGrande) {
     const etiqueta = typeof cantHosts === 'bigint'
         ? formatearCantidadV6(cantHosts) + ' direcciones'
         : formatearCantidad(cantHosts) + ' hosts';
-        return topologiaLanGrande(gateway, primerHost, ultimoHost, etiqueta, redLabel);
-    }
+    return topologiaLanGrande(gateway, primerHost, ultimoHost, etiqueta, redLabel);
+}
     return topologiaLanPequena(gateway, ultimoHost, Number(cantHosts), redLabel);
 }
